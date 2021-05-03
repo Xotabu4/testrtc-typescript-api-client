@@ -1,6 +1,9 @@
 import type { definitions, paths } from "../../types/swagger";
 import { BaseController } from "./base.controller";
 
+// Actual response contains id, which is very important, but not described in documentation
+type MinifiedTestResponseWithId = definitions['TestMinimized'] & { id: string }
+
 export class TestsController extends BaseController {
     /**
      * @param newTest allowed to contain not all fields
@@ -11,21 +14,21 @@ export class TestsController extends BaseController {
                 .url(`v1/tests`)
                 .method('POST')
                 .body(newTest)
-                .send<paths['/tests']['post']['responses']['200']['schema']>()
+                .send<paths['/tests']['post']['responses']['200']['schema'] & { id: string }>()
         ).body
     }
     async getTest(id: number | string) {
         return (
             await this.preparedRequest()
                 .url(`v1/tests/${id}`)
-                .send<paths['/tests/{testId}']['get']['responses']['200']['schema']>()
+                .send<MinifiedTestResponseWithId>()
         ).body
     }
     async getTests() {
         return (
             await this.preparedRequest()
                 .url('v1/tests')
-                .send<paths['/tests']['get']['responses']['200']['schema']>()
+                .send<MinifiedTestResponseWithId[]>()
         ).body
     }
     async updateTest(id: number | string, newTestData: Partial<definitions['Test']>) {
