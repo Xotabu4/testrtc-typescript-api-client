@@ -5,14 +5,21 @@ export class AssetsController extends BaseController {
     async getAssets() {
         return (
             await this.preparedRequest()
-                .url(`assets`)
+                .url(`v1/assets`)
                 .send<paths['/assets']['get']['responses']['200']['schema']>()
         ).body
     }
-    async createAsset(newAsset) {
+    async getAsset(id: string | number) {
         return (
             await this.preparedRequest()
-                .url(`assets`)
+                .url(`v1/assets/${id}`)
+                .send<Required<paths['/assets/{assetId}']['get']['responses']['200']['schema']>>()
+        ).body
+    }
+    async createAsset(newAsset: definitions['Asset']) {
+        return (
+            await this.preparedRequest()
+                .url(`v1/assets`)
                 .method('POST')
                 .body(newAsset)
                 .send<paths['/assets']['post']['responses']['201']['schema']>()
@@ -21,10 +28,18 @@ export class AssetsController extends BaseController {
     async updateAsset(id: number | string, newAssetData: Partial<definitions['Asset']>) {
         return (
             await this.preparedRequest()
-                .url(`assets/${id}`)
+                .url(`v1/assets/${id}`)
                 .method('PUT')
                 .body(newAssetData)
-                .send<paths['/assets']['post']['responses']['201']['schema']>()
+                .send<Required<paths['/assets/{assetId}']['put']['responses']['200']['schema']>>()
+        ).body
+    }
+    async deleteAsset(id: number | string) {
+        return (
+            await this.preparedRequest()
+                .url(`v1/assets/${id}`)
+                .method('DELETE')
+                .send<paths['/assets/{assetId}']['delete']['responses']['200']['schema']>()
         ).body
     }
 }

@@ -8,7 +8,7 @@ export class TestsController extends BaseController {
     async createTest(newTest: Partial<definitions['Test']>) {
         return (
             await this.preparedRequest()
-                .url(`tests`)
+                .url(`v1/tests`)
                 .method('POST')
                 .body(newTest)
                 .send<paths['/tests']['post']['responses']['200']['schema']>()
@@ -31,7 +31,7 @@ export class TestsController extends BaseController {
     async updateTest(id: number | string, newTestData: Partial<definitions['Test']>) {
         return (
             await this.preparedRequest()
-                .url(`tests/${id}`)
+                .url(`v1/tests/${id}`)
                 .method('PUT')
                 .body(newTestData)
                 .send<paths['/tests/{testId}']['put']['responses']['200']['schema']>()
@@ -40,7 +40,7 @@ export class TestsController extends BaseController {
     async deleteTest(id: string | number) {
         return (
             await this.preparedRequest()
-                .url(`tests/${id}`)
+                .url(`v1/tests/${id}`)
                 .method('DELETE')
                 .send<paths['/tests/{testId}']['delete']['responses']['200']['schema']>()
         ).body
@@ -48,7 +48,7 @@ export class TestsController extends BaseController {
     async runTest(id, runOptions) {
         return (
             await this.preparedRequest()
-                .url(`tests/${id}/run`)
+                .url(`v1/tests/${id}/run`)
                 .method('POST')
                 .body(runOptions)
                 .send<paths['/tests/{testId}/run']['post']['responses']['200']['schema']>()

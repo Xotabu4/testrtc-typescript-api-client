@@ -4,7 +4,14 @@ import type { TestRTCApiControllerOptions } from './controllers/base.controller'
 
 import { TestsController } from './controllers/tests.controller';
 import { AssetsController } from './controllers/assets.controller';
+import { TestRunsController } from './controllers/testRuns.controller';
+import { TestAgentsController } from './controllers/testAgents.controller';
+import { MonitorsController } from './controllers/monitors.controller';
+import { DefaultController } from './controllers/default.controller';
 
+/**
+ * @url https://apidoc.testrtc.com/?deepLinking=true
+ */
 export class TestRTCApiClient {
     public readonly tests: TestsController;
     public readonly testRuns: TestRunsController;
