@@ -1,19 +1,22 @@
 import { definitions, paths } from "../../types/swagger";
 import { BaseController } from "./base.controller";
 
+// TODO: id is missing in documentation
+type AssetWithId = Required<definitions["Asset"]> & { id: string }
+
 export class AssetsController extends BaseController {
     async getAssets() {
         return (
             await this.preparedRequest()
                 .url(`v1/assets`)
-                .send<paths['/assets']['get']['responses']['200']['schema']>()
+                .send<AssetWithId[]>()
         ).body
     }
     async getAsset(id: string | number) {
         return (
             await this.preparedRequest()
                 .url(`v1/assets/${id}`)
-                .send<Required<paths['/assets/{assetId}']['get']['responses']['200']['schema']>>()
+                .send<AssetWithId>()
         ).body
     }
     async createAsset(newAsset: definitions['Asset']) {
@@ -31,7 +34,7 @@ export class AssetsController extends BaseController {
                 .url(`v1/assets/${id}`)
                 .method('PUT')
                 .body(newAssetData)
-                .send<Required<paths['/assets/{assetId}']['put']['responses']['200']['schema']>>()
+                .send<AssetWithId>()
         ).body
     }
     async deleteAsset(id: number | string) {

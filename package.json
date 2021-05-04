@@ -1,6 +1,6 @@
 {
   "name": "testrtc-typescript-api-client",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Unoficial API client for testrtc.com service",
   "main": "./dist/client.js",
   "types": "./dist/client.d.ts",
