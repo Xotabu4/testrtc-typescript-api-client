@@ -20,7 +20,7 @@ export class TestRTCApiClient {
     public readonly assets: AssetsController;
     public readonly default: DefaultController;
 
-    constructor(options: Partial<TestRTCApiControllerOptions>) {
+    constructor(options: Partial<TestRTCApiControllerOptions> = {}) {
         const defaultOptions = {
             apiKey: process.env.TESTRTC_API_KEY,
             testRtcUrl: 'https://api.testrtc.com/v1/',

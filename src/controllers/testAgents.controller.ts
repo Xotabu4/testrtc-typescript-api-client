@@ -1,7 +1,7 @@
 import type { definitions, paths } from "../../types/swagger";
 import { BaseController } from "./base.controller";
 import * as fs from 'fs';
-import got from 'got';
+import { FormRequest } from 'http-req-builder'
 import * as FormData from 'form-data';
 
 type TestAgentInformationSchema = Required<paths['/testagents/{testAgentId}']['get']['responses']['200']['schema']>
@@ -129,16 +129,15 @@ export class TestAgentsController extends BaseController {
      * @returns 
      */
     async uploadFileToTestAgent(id: string | number, relativeFilePath: string, filename: string) {
-        const body = new FormData();
-        body.append('file', fs.createReadStream(relativeFilePath));
+        const form = new FormData();
+        form.append('file', fs.createReadStream(relativeFilePath));
         return (
-            await got.post<definitions['CustomMetrics']>({
-                prefixUrl: this.options.testRtcUrl,
-                url: `v1/testagents/${id}/screenshots`,
-                searchParams: { filename },
-                body
-            })
-        ).body;
+            await new FormRequest()
+                .prefixUrl(this.options.testRtcUrl)
+                .url(`v1/testagents/${id}/screenshots`)
+                .searchParams({ filename })
+                .body(form)
+        )
     }
     async getTestAgentScreenshots(id: string | number) {
         return (
