@@ -1,10 +1,12 @@
 {
   "name": "testrtc-typescript-api-client",
   "version": "1.0.0",
-  "description": "API client for testrtc.com service",
-  "main": "client.js",
+  "description": "Unoficial API client for testrtc.com service",
+  "main": "./dist/client.js",
   "scripts": {
-    "generate": "npx openapi-typescript https://apidoc.testrtc.com/swagger.json --output /types/swagger.d.ts"
+    "prepublishOnly": "npm run ts-from-swagger && npm run build",
+    "build": "tsc",
+    "ts-from-swagger": "npx openapi-typescript https://apidoc.testrtc.com/swagger.json --output ./types/swagger.d.ts"
   },
   "author": "Oleksandr Khotemskyi <xotabu4@gmail.com>",
   "license": "MIT",

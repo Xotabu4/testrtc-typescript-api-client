@@ -48,7 +48,7 @@ export class TestsController extends BaseController {
                 .send<paths['/tests/{testId}']['delete']['responses']['200']['schema']>()
         ).body
     }
-    async runTest(id, runOptions) {
+    async runTest(id: number | string, runOptions: definitions['TestRunParameters']) {
         return (
             await this.preparedRequest()
                 .url(`v1/tests/${id}/run`)

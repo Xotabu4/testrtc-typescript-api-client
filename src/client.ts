@@ -30,9 +30,7 @@ export class TestRTCApiClient {
             ...defaultOptions,
             ...options
         }
-        if (mergedOptions.apiKey == null || mergedOptions.apiKey === '') {
-            throw new Error('[TestRTCApiClient] No apiKey provided. Pass it in constructor options or set process.env.TESTRTC_API_KEY environment variable');
-        }
+        this.assertHasApiKey(mergedOptions)
 
         this.tests = new TestsController(mergedOptions);
         this.testRuns = new TestRunsController(mergedOptions);
@@ -40,5 +38,11 @@ export class TestRTCApiClient {
         this.monitors = new MonitorsController(mergedOptions);
         this.assets = new AssetsController(mergedOptions);
         this.default = new DefaultController(mergedOptions)
+    }
+
+    private assertHasApiKey(options: Partial<TestRTCApiControllerOptions>): asserts options is { apiKey: string } {
+        if (options.apiKey == null || options.apiKey === '') {
+            throw new Error('[TestRTCApiClient] No apiKey provided. Pass it in constructor options or set process.env.TESTRTC_API_KEY environment variable');
+        }
     }
 };

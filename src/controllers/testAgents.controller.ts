@@ -1,8 +1,8 @@
 import type { definitions, paths } from "../../types/swagger";
 import { BaseController } from "./base.controller";
-import fs from 'fs';
+import * as fs from 'fs';
 import got from 'got';
-import FormData from 'form-data';
+import * as FormData from 'form-data';
 
 type TestAgentInformationSchema = Required<paths['/testagents/{testAgentId}']['get']['responses']['200']['schema']>
 
