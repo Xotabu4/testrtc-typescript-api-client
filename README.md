@@ -1,12 +1,18 @@
-# Unofficial JS/TS API client for testrtc.com service
+# JS/TS API client for testrtc.com service
 
-Simple API client (HTTP) to work testrtc.com . Based on https://apidoc.testrtc.com/ documentation.
+API client (HTTP) to work testrtc.com . Based on https://apidoc.testrtc.com/ documentation.
 
-testrtc.com is a service that provides infrastructure and metrics analyzing for video/audio call quality measurments with different conditions. 
+testrtc.com is a service that provides infrastructure and metrics analysis for video/audio call quality measurments with different conditions (network, location, browser and so on). Useful for testing webRTC applications.
 
-This is **not** official client. I created it for my own needs, and decided to publish it to opensource. Please create issue if you found some bugs, or have a questions!
+This is **not** official client. Please create issue if you found some bugs, or have a question!
 
-Install:
+_____
+
+## Thanks to [Doxy.me](https://doxy.me) for helping with development and using! 
+## Doxy.me loves opensource!
+
+______
+### Install
 
 ```bash
 npm i testrtc-typescript-api-client
@@ -17,6 +23,7 @@ You will need apiKey to work with this API - create one here - https://app.testr
 You can pass apiKey as client constructor param. 
 
 ```typescript
+import { TestRTCApiClient } from 'testrtc-typescript-api-client'
 const client = new TestRTCApiClient({
     apiKey: 'xxxx-xxx-xxx-xxxx'
 })
@@ -31,8 +38,11 @@ const client = new TestRTCApiClient()
 ```
 apiKey from constructor param has higher priority than environment variable.
 
+____
+### Usage demo
 
-Usage demo:
+Since typings are included, follow your IDE suggestions when working with this package.
+
 ```typescript
 // importing
 import { TestRTCApiClient } from 'testrtc-typescript-api-client'
@@ -56,6 +66,3 @@ const testRunDetails = await client.testRuns.getDetailedTestRunInformation(launc
 ```
 
 See API docs for more details about available endpoints - https://apidoc.testrtc.com/
-
-
-Have a question
