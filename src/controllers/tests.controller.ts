@@ -11,7 +11,7 @@ export class TestsController extends BaseController {
     async createTest(newTest: Partial<definitions['Test']>) {
         return (
             await this.preparedRequest()
-                .url(`v1/tests`)
+                .url(`tests`)
                 .method('POST')
                 .body(newTest)
                 .send<paths['/tests']['post']['responses']['200']['schema'] & { id: string }>()
@@ -20,21 +20,21 @@ export class TestsController extends BaseController {
     async getTest(id: number | string) {
         return (
             await this.preparedRequest()
-                .url(`v1/tests/${id}`)
+                .url(`tests/${id}`)
                 .send<MinifiedTestResponseWithId>()
         ).body
     }
     async getTests() {
         return (
             await this.preparedRequest()
-                .url('v1/tests')
+                .url('tests')
                 .send<MinifiedTestResponseWithId[]>()
         ).body
     }
     async updateTest(id: number | string, newTestData: Partial<definitions['Test']>) {
         return (
             await this.preparedRequest()
-                .url(`v1/tests/${id}`)
+                .url(`tests/${id}`)
                 .method('PUT')
                 .body(newTestData)
                 .send<paths['/tests/{testId}']['put']['responses']['200']['schema']>()
@@ -43,7 +43,7 @@ export class TestsController extends BaseController {
     async deleteTest(id: string | number) {
         return (
             await this.preparedRequest()
-                .url(`v1/tests/${id}`)
+                .url(`tests/${id}`)
                 .method('DELETE')
                 .send<paths['/tests/{testId}']['delete']['responses']['200']['schema']>()
         ).body
@@ -51,7 +51,7 @@ export class TestsController extends BaseController {
     async runTest(id: number | string, runOptions: definitions['TestRunParameters']) {
         return (
             await this.preparedRequest()
-                .url(`v1/tests/${id}/run`)
+                .url(`tests/${id}/run`)
                 .method('POST')
                 .body(runOptions)
                 .send<paths['/tests/{testId}/run']['post']['responses']['200']['schema']>()

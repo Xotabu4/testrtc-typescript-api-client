@@ -91,7 +91,7 @@ export class TestAgentsController extends BaseController {
     async getTestAgentInformation<T = {}>(id: string | number, detailed: boolean = false) {
         return (
             await this.preparedRequest()
-                .url(`v1/testagents/${id}`)
+                .url(`testagents/${id}`)
                 .searchParams({ detailed })
                 .send<TestAgentInformationSchema & T>()
         ).body
@@ -116,7 +116,7 @@ export class TestAgentsController extends BaseController {
     async getTestAgentFile<T = string>(id: string | number, filename: Filenames) {
         return (
             await this.preparedRequest()
-                .url(`v1/testagents/${id}/files`)
+                .url(`testagents/${id}/files`)
                 .searchParams({ filename })
                 .send<T>()
         ).body
@@ -134,7 +134,7 @@ export class TestAgentsController extends BaseController {
         return (
             await new FormRequest()
                 .prefixUrl(this.options.testRtcUrl)
-                .url(`v1/testagents/${id}/screenshots`)
+                .url(`testagents/${id}/screenshots`)
                 .searchParams({ filename })
                 .body(form)
         )
@@ -142,7 +142,7 @@ export class TestAgentsController extends BaseController {
     async getTestAgentScreenshots(id: string | number) {
         return (
             await this.preparedRequest()
-                .url(`v1/testagents/${id}/screenshots`)
+                .url(`testagents/${id}/screenshots`)
                 .send<ScreenshotsResponse>()
         ).body
     }

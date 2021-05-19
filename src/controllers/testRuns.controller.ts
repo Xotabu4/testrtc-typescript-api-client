@@ -51,7 +51,7 @@ export class TestRunsController extends BaseController {
     async getTestRunInformation<T = {}>(id: string | number, detailed: boolean = false) {
         return (
             await this.preparedRequest()
-                .url(`v1/testruns/${id}`)
+                .url(`testruns/${id}`)
                 .searchParams({ detailed })
                 .send<TestRunInformationSchema & T>()
         ).body

@@ -8,7 +8,7 @@ export class MonitorsController extends BaseController {
     async createMonitor(monitor: definitions['Monitor']) {
         return (
             await this.preparedRequest()
-                .url(`v1/monitors`)
+                .url(`monitors`)
                 .method('POST')
                 .body(monitor)
                 .send<paths['/monitors/']['post']['responses']['201']['schema']>()
@@ -17,7 +17,7 @@ export class MonitorsController extends BaseController {
     async updateMonitorStatus(id: string | number, status: boolean) {
         return (
             await this.preparedRequest()
-                .url(`v1/monitors/${id}/status`)
+                .url(`monitors/${id}/status`)
                 .method('PUT')
                 .body({ status })
                 // TODO: cannot find structure of response
