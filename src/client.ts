@@ -8,6 +8,7 @@ import { TestRunsController } from './controllers/testRuns.controller';
 import { TestAgentsController } from './controllers/testAgents.controller';
 import { MonitorsController } from './controllers/monitors.controller';
 import { DefaultController } from './controllers/default.controller';
+import { QualityRtcController } from './controllers/qualityrtc.controller';
 
 /**
  * @url https://apidoc.testrtc.com/?deepLinking=true
@@ -19,6 +20,7 @@ export class TestRTCApiClient {
     public readonly monitors: MonitorsController;
     public readonly assets: AssetsController;
     public readonly default: DefaultController;
+    public readonly qualityRtc: QualityRtcController;
 
     constructor(options: Partial<TestRTCApiControllerOptions> = {}) {
         const defaultOptions = {
@@ -37,7 +39,8 @@ export class TestRTCApiClient {
         this.testAgents = new TestAgentsController(mergedOptions);
         this.monitors = new MonitorsController(mergedOptions);
         this.assets = new AssetsController(mergedOptions);
-        this.default = new DefaultController(mergedOptions)
+        this.default = new DefaultController(mergedOptions);
+        this.qualityRtc = new QualityRtcController(mergedOptions)
     }
 
     private assertHasApiKey(options: Partial<TestRTCApiControllerOptions>): asserts options is { apiKey: string } {

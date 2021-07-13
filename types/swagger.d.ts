@@ -26,6 +26,10 @@ export interface paths {
     /** <p>Retrieve test run information.</p><p><i>Additional fields will be returned in the future in the JSON once we model them nicely.</i></p> */
     get: operations["retrieveTestRunById"];
   };
+  "/testruns/externalValue/{session_name}": {
+    /** Set test external value to be used with NightWatch script command rtcWaitForExternalValue */
+    post: operations["setTestRunExternalValue"];
+  };
   "/testagents/{testAgentId}": {
     /** <p>Retrieve report of a specific test agent information.</p><p>Each test run result is constructed out of the number of test agents used for running the test. This API retrieves the information from one specific test agent within a test run.</p><p><i>Additional fields will be returned in the future in the JSON once we model them nicely.</i></p> */
     get: operations["retrieveTestAgentById"];
@@ -40,9 +44,17 @@ export interface paths {
     /** <p>Create a new monitor.</p> */
     post: operations["createMonitor"];
   };
+  "/monitors/{monitorId}": {
+    /** <p>Get last monitor run ids</p> */
+    get: operations["getMonitorResultIds"];
+  };
   "/monitors/{monitorId}/status": {
     /** <p>Update a monitor.</p> */
     put: operations["updateMonitorStatus"];
+  };
+  "/monitors/{monitorId}/last": {
+    /** <p>Get last monitor run status</p> */
+    get: operations["getLastMonitorRunStatus"];
   };
   "/networktest/{id}": {};
   "/assets": {
@@ -71,12 +83,13 @@ export interface paths {
     /** <p>Get usage.</p> */
     get: operations["getUsage"];
   };
+  "/qualityrtc-invite": {
+    /** <p>Create qualityRTC Invite</p> */
+    post: operations["createQualityRtcInvite"];
+  };
 }
 
 export interface definitions {
-  EncodedPassword: {
-    encodedPass?: number[];
-  };
   /** A Monitors holds all the configurations for monitoring text execution. */
   Monitor: {
     /** A verbose description for the monitor. */
@@ -85,7 +98,13 @@ export interface definitions {
     active: boolean;
     /** Id of test for which monitor is creating. */
     executeTest: string;
-    /** Scheduling for monitor. */
+    /**
+     * Scheduling for monitor.
+     * h - Once an hour
+     * d - Once a day
+     * 30 - every 30 min ( 15, 5 )
+     * c - cron expression, scheduleCron needed
+     */
     scheduleMode?: string;
     /** Schedule cron */
     scheduleCron?: string;
@@ -94,43 +113,6 @@ export interface definitions {
   MonitorStatus: {
     /** Monitor status */
     status: boolean;
-  };
-  /** A Status page object includes detailed information about service status. */
-  StatusPage: {
-    /** The role of current environment */
-    role?: {
-      /** The value which indicates does current environment have role 'web' */
-      web?: boolean;
-      /** The value which indicates does current environment have role 'monitor' */
-      monitor?: boolean;
-      /** The value which indicates does current environment have role 'batchexec' */
-      batchexec?: boolean;
-      /** The value which indicates does current environment have role 'remoteWorker' */
-      remoteWorker?: boolean;
-      /** The value which indicates does current environment have role 'api' */
-      api?: boolean;
-    };
-    /** The configuration of current environment */
-    config?: {
-      /** The current version */
-      version?: string;
-      /** The version of agent */
-      agentVersion?: string;
-      /** The system name of environment */
-      systemName?: string;
-      /** The name of instance */
-      instanceName?: string;
-    };
-    /** The status of queue */
-    queueStatus?: string;
-    /** The queue count */
-    queueCount?: number;
-    /** The queue status */
-    dbStatus?: string;
-    /** The database count */
-    dbCount?: number;
-    /** The status of service, indicates working status. */
-    status?: string;
   };
   /** An array holds all the necessary tests that can be executed in testRTC */
   Tests: definitions["TestMinimized"][];
@@ -148,7 +130,11 @@ export interface definitions {
     testScript?: string;
     /** The SERVICE_URL configured for this test */
     serviceUrl?: string;
-    /** The inicator is SERVICE_URL open */
+    /** Webhook object */
+    webhook?: string;
+    /** Session size */
+    sessionSize?: number;
+    /** The indicator is SERVICE_URL open */
     serviceUrlOpen?: boolean;
     /** The browser type. */
     browserType?: string;
@@ -165,6 +151,8 @@ export interface definitions {
   };
   /** A Test holds all the necessary elements that hold a test that can be executed in testRTC */
   TestMinimized: {
+    /** The unique index given to the test */
+    id?: string;
     /** The readable name given to the test */
     name: string;
     /** A verbose description for the test */
@@ -173,6 +161,11 @@ export interface definitions {
     runOptions?: string;
     /** The test script itself */
     testScript?: string;
+    /** Webhook object */
+    webhook?: string;
+    /** Session size */
+    sessionSize?: number;
+    testProfiles?: definitions["TestProfile"][];
     /** The SERVICE_URL configured for this test */
     serviceUrl?: string;
     /** Parameters for test */
@@ -329,7 +322,7 @@ export interface definitions {
   /** GetStats data collected during remote test execution (via SDK) */
   GetStatsChunk: {
     /** GetStats data */
-    data: { [key: string]: any };
+    data: { [key: string]: unknown };
     /** Indicates that the test run should be finalized after this chunk of data */
     isLastChunk?: boolean;
   };
@@ -338,10 +331,8 @@ export interface definitions {
     /** Test name */
     name: string;
   };
-  /** Network test results */
-  NetworkTestData: { [key: string]: any };
   /** Network test config */
-  NetworkTestConfig: { [key: string]: any };
+  NetworkTestConfig: { [key: string]: unknown };
   /** An Asset. */
   Asset: {
     /** The uniq and readable name given to the asset. */
@@ -398,36 +389,33 @@ export interface definitions {
     /** account */
     account: string;
   };
-  /** AnalyzeRtc authentication object */
-  AnalyzeRTCAuthRequest: {
-    /** Auto generated api key from the main app */
-    apiKey?: string;
+  MonitorResultsResponse: {
+    testRunIds?: string[];
   };
-  /** AnalyzeRtc authentication object */
-  AnalyzeRTCAuthResponse: {
-    /** User Ref identifier */
-    userRef?: string;
-    /** Urls allowed to collect data from */
-    urls?: string[];
-  };
-  /** Docker Machine */
-  DockerMachine: {
-    /** Identifier */
+  String: string;
+  /** Last monitor run info */
+  LastRunStatus: {
     id?: string;
-    /** Identifier */
-    name?: string;
-    /** Binary */
-    binary?: string;
-    /** Chromedriver */
-    chromedriver?: string;
-    /** Chromedriver */
-    "image-name"?: string;
-    /** Chromedriver */
-    "debug-image-name"?: string;
+    timestamp?: string;
+    status?: string;
   };
-  /** Global Settings */
-  GlobalSettings: {
-    "docker-machines"?: definitions["DockerMachine"][];
+  /** QualityRTC Invite model */
+  QualityRTCInviteRequest: {
+    name: string;
+    expiration: string;
+    /** JSON string object: https://testrtc.com/docs/invite-options-in-qualityrtc/ */
+    options?: string;
+    numberOfTests: number;
+    /** JSON object which contains additional fields values */
+    fields?: { [key: string]: unknown };
+  };
+  QualityRTCInviteId: {
+    inviteId: string;
+  };
+  /** Key and value object */
+  KeyValObj: {
+    key?: string;
+    value?: string;
   };
 }
 
@@ -449,7 +437,7 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -478,7 +466,7 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -507,7 +495,7 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -540,7 +528,7 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -569,7 +557,7 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -602,7 +590,7 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -635,7 +623,38 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
+      default: {
+        schema: definitions["Error"];
+      };
+    };
+  };
+  /** Set test external value to be used with NightWatch script command rtcWaitForExternalValue */
+  setTestRunExternalValue: {
+    parameters: {
+      path: {
+        /** RTC Session Name */
+        session_name: string;
+      };
+      body: {
+        /** External value to set */
+        external_value: definitions["KeyValObj"];
+      };
+    };
+    responses: {
+      /** success update */
+      200: unknown;
+      /** Bad request - Invalid parameters supplied */
+      400: {
+        schema: definitions["Error"];
+      };
+      /** Unauthorized - API key is invalid */
+      401: unknown;
+      /** Forbidden - Resource is not allowed */
+      403: unknown;
+      /** Not found - resource does not exist */
+      404: unknown;
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -668,7 +687,7 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -689,7 +708,7 @@ export interface operations {
     responses: {
       /** Test agent file */
       200: {
-        schema: { [key: string]: any };
+        schema: { [key: string]: unknown };
       };
       /** Bad request - Invalid parameters supplied */
       400: {
@@ -701,7 +720,7 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -716,7 +735,7 @@ export interface operations {
       };
       formData: {
         /** The file  to upload. */
-        file?: { [key: string]: any };
+        file?: { [key: string]: unknown };
       };
       query: {
         /** File name. */
@@ -738,7 +757,7 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -765,9 +784,42 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Test for monitor not found */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
+      default: {
+        schema: definitions["Error"];
+      };
+    };
+  };
+  /** <p>Get last monitor run ids</p> */
+  getMonitorResultIds: {
+    parameters: {
+      path: {
+        /** ID of the monitor to get last runs */
+        monitorId: string;
+      };
+      query: {
+        /** Amount of last results to get. Max 100. Default 10 */
+        max?: string;
+      };
+    };
+    responses: {
+      /** Last monitor results */
+      200: {
+        schema: definitions["MonitorResultsResponse"];
+      };
+      /** Bad request - Invalid parameters supplied */
+      400: {
+        schema: definitions["Error"];
+      };
+      /** Unauthorized - API key is invalid */
+      401: unknown;
+      /** Forbidden - Resource is not allowed */
+      403: unknown;
+      /** Not found - Monitor not found */
+      404: unknown;
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -796,9 +848,38 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Monitor runs not found */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
+      default: {
+        schema: definitions["Error"];
+      };
+    };
+  };
+  /** <p>Get last monitor run status</p> */
+  getLastMonitorRunStatus: {
+    parameters: {
+      path: {
+        /** ID of the monitor to get last run status */
+        monitorId: string;
+      };
+    };
+    responses: {
+      /** Monitor last run info */
+      200: {
+        schema: definitions["LastRunStatus"];
+      };
+      /** Bad request - Invalid parameters supplied */
+      400: {
+        schema: definitions["Error"];
+      };
+      /** Unauthorized - API key is invalid */
+      401: unknown;
+      /** Forbidden - Resource is not allowed */
+      403: unknown;
+      /** Not found - Monitor runs not found */
+      404: unknown;
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -821,7 +902,7 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -854,7 +935,7 @@ export interface operations {
       409: {
         schema: definitions["Error"];
       };
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -883,7 +964,7 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -920,7 +1001,7 @@ export interface operations {
       409: {
         schema: definitions["Error"];
       };
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -949,7 +1030,7 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -978,7 +1059,7 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -1007,7 +1088,7 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
@@ -1018,7 +1099,7 @@ export interface operations {
     responses: {
       /** Usage */
       200: {
-        schema: { [key: string]: any };
+        schema: { [key: string]: unknown };
       };
       /** Bad request */
       400: {
@@ -1030,10 +1111,41 @@ export interface operations {
       403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
-      /** unexpected error */
+      /** Unexpected error */
+      default: {
+        schema: definitions["Error"];
+      };
+    };
+  };
+  /** <p>Create qualityRTC Invite</p> */
+  createQualityRtcInvite: {
+    parameters: {
+      body: {
+        /** QualityRTC Invite to create */
+        invite: definitions["QualityRTCInviteRequest"];
+      };
+    };
+    responses: {
+      /** QualityRTC Invite Created */
+      200: {
+        schema: definitions["QualityRTCInviteId"];
+      };
+      /** Bad request - Invalid parameters supplied */
+      400: {
+        schema: definitions["Error"];
+      };
+      /** Unauthorized - API key is invalid */
+      401: unknown;
+      /** Forbidden - Resource is not allowed */
+      403: unknown;
+      /** Not found - resource does not exist */
+      404: unknown;
+      /** Unexpected error */
       default: {
         schema: definitions["Error"];
       };
     };
   };
 }
+
+export interface external {}

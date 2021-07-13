@@ -1,6 +1,6 @@
 # JS/TS API client for testrtc.com service
 
-API client (HTTP) to work testrtc.com . Based on https://apidoc.testrtc.com/ documentation (v1).
+API client (HTTP) to work testrtc.com . Based on https://apidoc.testrtc.com/ documentation (v1.24.0).
 
 testrtc.com is a service that provides infrastructure and metrics analysis for video/audio call quality measurments with different conditions (network, location, browser and so on). Useful for testing webRTC applications.
 
