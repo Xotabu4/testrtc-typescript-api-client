@@ -5,7 +5,7 @@
 
 export interface paths {
   "/tests": {
-    /** <p>List all tests in your project. This function is useful if you want to iterate overyour tests. A good example for that is when you want to collect all testId's in order to run them sequentially on your nightly build.</p> */
+    /** <p>List all tests in your project. This function is useful if you want to iterate over your tests. A good example for that is when you want to collect all testId's in order to run them sequentially on your nightly build.</p> */
     get: operations["getTests"];
     /** <p>Create a new test.</p> */
     post: operations["createTest"];
@@ -13,7 +13,7 @@ export interface paths {
   "/tests/{testId}": {
     /** <p>Retrieve the information of a specific test.</p><p><i>Additional fields will be returned in the future in the JSON once we model them nicely.</i></p> */
     get: operations["findTestById"];
-    /** <p>Update a new test.</p> */
+    /** <p>Update a test.</p> */
     put: operations["updateTest"];
     /** <p>Delete a test.</p> */
     delete: operations["deleteTest"];
@@ -40,23 +40,8 @@ export interface paths {
     /** <p>Post file which will be uploaded to the test agent as part of results</p> */
     post: operations["uploadFileToTestAgent"];
   };
-  "/monitors/": {
-    /** <p>Create a new monitor.</p> */
-    post: operations["createMonitor"];
-  };
-  "/monitors/{monitorId}": {
-    /** <p>Get last monitor run ids</p> */
-    get: operations["getMonitorResultIds"];
-  };
-  "/monitors/{monitorId}/status": {
-    /** <p>Update a monitor.</p> */
-    put: operations["updateMonitorStatus"];
-  };
-  "/monitors/{monitorId}/last": {
-    /** <p>Get last monitor run status</p> */
-    get: operations["getLastMonitorRunStatus"];
-  };
   "/networktest/{id}": {};
+  "/networktest-report/{id}": {};
   "/assets": {
     /** <p>List all assets in your project.</p> */
     get: operations["getAssets"];
@@ -75,352 +60,572 @@ export interface paths {
     /** <p>Get the screenshots taken for a specific probe (=test run agent) used in a test or a monitor execution.</p> */
     get: operations["getScreenshots"];
   };
-  "/dial-in": {
-    /** <p>Dial In.</p> */
-    post: operations["dialIn"];
+  "/qualityrtc/result/{id}": {
+    /** <p>Get result of network test.</p> */
+    get: operations["getQualityRtcResult"];
   };
-  "/usage": {
-    /** <p>Get usage.</p> */
-    get: operations["getUsage"];
-  };
-  "/qualityrtc-invite": {
+  "/qualityrtc/invite": {
     /** <p>Create qualityRTC Invite</p> */
     post: operations["createQualityRtcInvite"];
+  };
+  "/watchrtc/highlights": {
+    /** <p>watchRTC Highlights</p> */
+    post: operations["watchrtcHighlights"];
+  };
+  "/watchrtc/room/{rtcRoomId}/peer/{rtcPeerId}/user-rating": {
+    /** <p>Set the user's rating on a given session.</p><p>If you are using the same roomId for multiple sessions then the user rating will be set only to the last time the roomId was used. */
+    put: operations["watchrtcSetUserRating"];
+  };
+  "/watchrtc/room/{roomId}/peer/{peerId}/keys": {
+    /** <p>Add keys to a session of a specific peer inside a room.</p><p>If you are using the same roomId for multiple sessions then the keys will be added only to the last time the roomId was used.</p> */
+    put: operations["watchrtcAddKeys"];
+  };
+  "/analyzertc/upload": {
+    /** <p>Upload dump file to get analyzeRTC result.</p> */
+    post: operations["uploadAnalyzeDump"];
+  };
+  "/ip-ranges": {
+    /** <p>Get GCP IP address ranges.</p> */
+    get: operations["getGCPIPRangesInfo"];
   };
 }
 
 export interface definitions {
-  /** A Monitors holds all the configurations for monitoring text execution. */
+  /** @description A Monitors holds all the configurations for monitoring text execution. */
   Monitor: {
-    /** A verbose description for the monitor. */
+    /** @description A verbose description for the monitor. */
     info?: string;
-    /** Should monitor be activated. */
+    /** @description Should monitor be activated. */
     active: boolean;
-    /** Id of test for which monitor is creating. */
+    /** @description Id of test for which monitor is creating. */
     executeTest: string;
     /**
-     * Scheduling for monitor.
+     * @description Scheduling for monitor.
      * h - Once an hour
      * d - Once a day
      * 30 - every 30 min ( 15, 5 )
      * c - cron expression, scheduleCron needed
      */
     scheduleMode?: string;
-    /** Schedule cron */
+    /** @description Schedule cron */
     scheduleCron?: string;
   };
-  /** A Monitor status field */
+  /** @description A Monitor status field */
   MonitorStatus: {
-    /** Monitor status */
+    /** @description Monitor status */
     status: boolean;
   };
-  /** An array holds all the necessary tests that can be executed in testRTC */
+  /** @description An array holds all the necessary tests that can be executed in testRTC */
   Tests: definitions["TestMinimized"][];
-  /** A Test holds all the necessary elements that hold a test that can be executed in testRTC */
+  /** @description A Test holds all the necessary elements that hold a test that can be executed in testRTC */
   Test: {
-    /** The readable name given to the test */
-    name: string;
-    /** A verbose description for the test */
+    /** @description The readable name given to the test ( required for creation ) */
+    name?: string;
+    /** @description A verbose description for the test */
     info?: string;
-    /** The tagged run options configured for this test */
+    /** @description The tagged run options configured for this test */
     runOptions?: string;
-    /** Started */
+    /** @description Started */
     stared?: boolean;
-    /** The test script itself */
+    /** @description The test script itself */
     testScript?: string;
-    /** The SERVICE_URL configured for this test */
+    /** @description The SERVICE_URL configured for this test */
     serviceUrl?: string;
-    /** Webhook object */
+    /** @description Webhook object */
     webhook?: string;
-    /** Session size */
+    /** @description Session size */
     sessionSize?: number;
-    /** The indicator is SERVICE_URL open */
+    /** @description The indicator is SERVICE_URL open */
     serviceUrlOpen?: boolean;
-    /** The browser type. */
-    browserType?: string;
-    /** The browser version */
-    browserVersion?: string;
-    /** Parameters for test */
-    parameters: {
-      /** The duration of test */
-      duration?: number;
-      /** The number of concurrent users */
+    /** @description Parameters for test ( required for creation ) */
+    parameters?: {
+      /** @description The number of concurrent users */
       concurrentUsers?: number;
     };
     testProfiles?: definitions["TestProfile"][];
   };
-  /** A Test holds all the necessary elements that hold a test that can be executed in testRTC */
+  /** @description A Test holds all the necessary elements that hold a test that can be executed in testRTC */
   TestMinimized: {
-    /** The unique index given to the test */
+    /** @description The unique index given to the test */
     id?: string;
-    /** The readable name given to the test */
+    /** @description The readable name given to the test */
     name: string;
-    /** A verbose description for the test */
+    /** @description A verbose description for the test */
     info?: string;
-    /** The tagged run options configured for this test */
+    /** @description The tagged run options configured for this test */
     runOptions?: string;
-    /** The test script itself */
+    /** @description The test script itself */
     testScript?: string;
-    /** Webhook object */
+    /** @description Webhook object */
     webhook?: string;
-    /** Session size */
+    /** @description Session size */
     sessionSize?: number;
     testProfiles?: definitions["TestProfile"][];
-    /** The SERVICE_URL configured for this test */
+    /** @description The SERVICE_URL configured for this test */
     serviceUrl?: string;
-    /** Parameters for test */
+    /** @description Parameters for test */
     parameters: {
-      /** The number of concurrent users */
+      /** @description The number of concurrent users */
       concurrentUsers?: number;
     };
   };
-  /** Test profile object. */
+  /** @description Test profile object. */
   TestProfile: {
-    /** testProfile */
+    /** @description testProfile */
     media?: string;
-    /** Type of firewall */
+    /** @description Type of firewall */
     firewall?: string;
-    /** Network connection */
+    /** @description Network connection */
     network?: string;
-    /** Test location */
+    /** @description Test location */
     location?: string;
-    /** Browser for the test. */
+    /** @description Browser for the test. */
     browser?: string;
   };
-  /** TBD */
+  /** @description TBD */
   TestRunParameters: {
-    /** <p>A list of key values of fields of the test that are overridden with specific values for this test. Fields that can be overridden are:</p><ul><li>concurrentUsers</li><li>iterations</li><li>runOptions</li><li>serviceUrl</li></ul> */
+    /** @description <p>A list of key values of fields of the test that are overridden with specific values for this test. Fields that can be overridden are:</p><ul><li>concurrentUsers</li><li>iterations</li><li>runOptions</li><li>serviceUrl</li></ul> */
     executionParameters?: {
-      /** The number of concurrent browser agents used in this test run */
+      /**
+       * Format: int32
+       * @description The number of concurrent browser agents used in this test run
+       */
       concurrentUsers?: number;
-      /** The session size used in this test run */
+      /**
+       * Format: int32
+       * @description The session size used in this test run
+       */
       sessionSize?: number;
     };
-    /** A list of environment variables to add to the test execution. These will be accessible through process.env. */
+    /** @description A list of environment variables to add to the test execution. These will be accessible through process.env. */
     environmentVariables?: definitions["EnvironmentVariable"][];
-    /** A list of machine profiles used to run a testagents */
+    /** @description A list of machine profiles used to run a TestAgents */
     machineProfiles?: definitions["MachineProfile"][];
   };
-  /** A key value pair of a variable and its value */
+  /** @description A key value pair of a variable and its value */
   EnvironmentVariable: {
-    /** The variable's name */
+    /** @description The variable's name */
     variable?: string;
-    /** The variable's value */
+    /** @description The variable's value */
     value?: string;
   };
-  /** Machine profile for the test */
+  /** @description Machine profile for the test */
   MachineProfile: {
-    /** The browser used for the test */
+    /** @description The browser used for the test */
     browser: string;
-    /** The data center used for the test */
+    /** @description The data center used for the test */
     location: string;
-    /** The network profile used by the test */
+    /** @description The network profile used by the test */
     network: string;
-    /** The firewall profile used by the test */
+    /** @description The firewall profile used by the test */
     firewall: string;
-    /** The media file used by this test */
+    /** @description The media file used by this test */
     media: string;
   };
-  /** A TestRun object holds a specific test execution */
+  /** @description A TestRun object holds a specific test execution info with detailed stats (if detailed = true) */
   TestRun: {
-    /** The unique identity of the TestRun object. Used as the key to access a test run. */
+    /** @description The unique identifier of the TestRun object. Used as the key to access a test execution. */
     testRunId?: string;
-    /** The unique identity of the Test object. */
+    /** @description The unique identifier of the Test object. */
     testId?: string;
-    /** The result status of the test. Can be 'success', 'warning' or 'failure' */
+    /** @description The readable name given to the test. */
+    testName?: string;
+    /** @description A random name given to this test run, as a readable alternative to the testRunId */
+    runName?: string;
+    /** @description The result status of the test. Can be 'success', 'warnings' or 'failure' */
     status?: string;
-    /** Can be either 'manual' or 'automated' */
+    /** @description Can be either 'test' or 'monitor' */
     runType?: string;
-    /** The number of concurrent browser agents used in this test run */
+    /**
+     * Format: int32
+     * @description The number of concurrent browser probes used in this test run
+     */
     concurrentUsers?: number;
-    /** The total number of WebRTC PeerConnection sessions conducted in this test run */
+    /**
+     * Format: int32
+     * @description The number of browser probes, finished with 'completed' or 'warnings' status in this test execution
+     */
+    succeedProbes?: number;
+    /**
+     * Format: int32
+     * @description The number of probes placed per session in this test run
+     */
     sessionSize?: number;
-    /** The starting time of the test run */
+    /**
+     * Format: ISOString
+     * @description The starting time of test execution (UTC format)
+     */
     startTime?: string;
-    /** (in seconds) The total duration of the test run */
-    duration?: number;
-    /** The list of unique test agents used in the given test run. This can either be ID values or expanded TestAgent objects, depending on which API call was made and what parameters was passed to it. */
+    /**
+     * Format: int32
+     * @description The duration of the test from the moment the probes spawned the browsers until logs were collected at the end of the test (in seconds)
+     */
+    testDuration?: number;
+    /** @description The list of unique test probes used in the given test execution. This can either be ID values or expanded TestAgent objects, depending on which API call was made and what parameters was passed to it. */
     agents?: string[];
-    /** URL of this test result */
+    /** @description An array of custom metrics added by the customer to this probe's test results */
+    customMetrics?: definitions["CustomMetrics"][];
+    /** @description URL of this test result */
     url?: string;
+    stats?: definitions["TestRunStats"];
   };
-  /** A TestAgent object holds the reported statistics of a specific browser agent used in a given TestRun. */
+  /** @description A TestAgent object holds a specific browser probe info with detailed stats (if detailed = true) that was used in a given TestRun */
   TestAgent: {
-    /** The unique identifier of a test agent used in a test run. This value is unique across the testRTC service */
+    /** @description The unique identifier of a test probe used in a test run. This value is unique across the testRTC service */
     testAgentId?: string;
-    /** The unique identifier of the test run this test agent was used in */
+    /** @description The unique identifier of the TestRun this test probe was used in */
     testRunId?: string;
-    /** The unique identifier of the test that was executed by this agent */
+    /** @description The unique identifier of the Test that was executed by this probe */
     testId?: string;
-    /** The result status of the test. Can be 'success', 'warning' or 'failure' */
+    /** @description The result status of the test. Can be 'success', 'warning' or 'failure' */
     status?: string;
-    /** The type of the machine used by this test agent */
+    /**
+     * Format: int32
+     * @description The index of this probe within the test run. Starts from 1
+     */
+    agentIdx?: number;
+    /**
+     * Format: int32
+     * @description The index of this probe's session within the test run. Starts from 1
+     */
+    sessionIdx?: number;
+    /**
+     * Format: int32
+     * @description The index of this probe within the session. Starts from 1
+     */
+    inSessionIdx?: number;
+    /** @description The type of the machine used by this test probe */
     machine?: string;
-    /** The operating system used by this test agent */
+    /** @description The operating system used by this test probe */
     os?: string;
-    /** The browser used by this test agent */
+    /** @description The browser used by this test probe */
     browser?: {
-      /** The name of the browser used */
+      /** @description The name of the browser used */
       name: string;
-      /** The exact browser version used */
+      /** @description The exact browser version used */
       version: string;
     };
-    /** The data center this test agent was running from */
+    /** @description The data center this test probe was running from */
     location?: string;
-    /** The network profile used by this test agent */
+    /** @description The network profile used by this test probe */
     networkProfile?: string;
-    /** The firewall profile used by this test agent */
+    /** @description The firewall profile used by this test probe */
     firewallProfile?: string;
-    /** The media file used by this test agent */
+    /** @description The media file used by this test probe */
     mediaFile?: string;
-    /** The index of this agent within the test run. Starts from 1 */
-    agentIdx?: number;
-    /** The index of this agent's session within the test run. Starts from 1 */
-    sessionIdx?: number;
-    /** The index of this agent within the session. Starts from 1 */
-    inSessionIdx?: number;
-    /** The starting time of the test run */
-    startTime?: string;
-    /** (in seconds) The total duration of the test run */
-    duration?: number;
-    /** An array of custom metrics added by the customer to this agent's test results */
+    /**
+     * Format: ISOString
+     * @description The starting time of the test execution (UTC format)
+     */
+    testStartTime?: string;
+    /**
+     * Format: int32
+     * @description The total duration of the test run (in seconds)
+     */
+    testDuration?: number;
+    /**
+     * Format: ISOString
+     * @description The time of first communication channel was opened (UTC format)
+     */
+    connectionStartTime?: string;
+    /**
+     * Format: int32
+     * @description The total time communication channels were open (in seconds)
+     */
+    connectionDuration?: number;
+    /** @description An array of custom metrics added by the customer to this probe's test results */
     customMetrics?: definitions["CustomMetrics"][];
-    /** Channels created in this test run */
+    /** @description Channels created in this test run */
     channels?: definitions["Channels"][];
+    textError?: string;
+    rtcSetAdditionalInfo?: { [key: string]: unknown };
+    /** @description Total amount of warnings */
+    warnings?: number;
+    /** @description Total amount of errors */
+    errors?: number;
+    stats?: definitions["TestAgentStats"];
   };
-  /** A custom metric value, provided by the customer */
+  /** @description Additional information about the test execution. <b>performance</b> includes average maximal, average minimal and average values for performance data across all browser agents, used in a given TestRun */
+  TestRunStats: {
+    /** @description Overall quality score of the test run (between 0-10; -1 if not calculated) */
+    score?: number;
+    /** @description The average call setup time across all probes in the test run (in milliseconds) */
+    callSetupTime?: number;
+    performance?: definitions["PerformanceStats"];
+    /** @description Audio performance metrics, averaged across all probes in the test run */
+    audio?: {
+      recv?: definitions["MediaStats"];
+      send?: definitions["MediaStats"];
+    };
+    /** @description Video performance metrics, averaged across all probes in the test run */
+    video?: {
+      recv?: definitions["MediaStats"];
+      send?: definitions["MediaStats"];
+    };
+  };
+  /** @description Additional information about the TestAgent. <b>performance</b> includes maximal, minimal and average values for performance data of specific browser agent */
+  TestAgentStats: {
+    /** @description Overall quality score of the test probe (between 0-10; -1 if not calculated) */
+    score?: number;
+    /** @description The time it took to connect the session. This is measured from the first setLocalDescription until the connected state (in milliseconds) */
+    callSetupTime?: number;
+    performance?: definitions["PerformanceStats"];
+    /** @description Audio data metrics */
+    audio?: {
+      recv?: definitions["MediaStats"];
+      send?: definitions["MediaStats"];
+    };
+    /** @description Video data metrics.<br/> Weighted average for FPS across all video channels */
+    video?: {
+      recv?: definitions["MediaStats"];
+      send?: definitions["MediaStats"];
+    };
+  };
+  MediaStats: {
+    /** @description Average bitrate (in bits) */
+    bitrate?: number;
+    /** @description Average packets loss (0.015 = 1.51%) */
+    packetLoss?: number;
+    /** @description Average jitter (in milliseconds) */
+    jitter?: number;
+    /** @description Average round trip time (provided only for outgoing channels, in milliseconds) */
+    rtt?: number;
+    /** @description Average frame rate (provided only for video channels) */
+    fps?: number;
+  };
+  PerformanceStats: {
+    /** @description CPU used by the browser (in %) */
+    browserCpu?: {
+      max?: number;
+      avg?: number;
+      min?: number;
+    };
+    /** @description Memory used by the browser (in MBytes) */
+    browserMemory?: {
+      max?: number;
+      avg?: number;
+      min?: number;
+    };
+    /** @description CPU used by the probe (in %) */
+    probeCpu?: {
+      max?: number;
+      avg?: number;
+      min?: number;
+    };
+    /** @description Memory used by the probe (in %) */
+    probeMemory?: {
+      max?: number;
+      avg?: number;
+      min?: number;
+    };
+    /** @description Memory used by the probe (in MBytes) */
+    probeMemoryMb?: {
+      max?: number;
+      avg?: number;
+      min?: number;
+    };
+  };
+  /** @description A custom metric value, provided by the customer */
   CustomMetrics: {
-    /** The customer-given name for the metric. This is used as a unique identifier when aggregating metric values across a test run */
+    /** @description The customer-given name for the metric. This is used as a unique identifier when aggregating metric values across a test run */
     name: string;
-    /** The value of the custom metric */
+    /** @description The value of the custom metric */
     value: string;
   };
-  /** A media channel in an agent's test run */
+  /** @description A media channel in an agent's test run */
   Channels: {
-    /** The name of the channel. Usually this would be the SSRC generated by the browser for the channel, if it is available */
+    /** @description The name of the channel. Usually this would be the SSRC generated by the browser for the channel, if it is available */
     name: string;
-    /** Can be either 'in' or 'out' */
+    /** @description Can be either 'in' or 'out' */
     direction: string;
-    /** Can be either 'audio' or 'video' */
+    /** @description Can be either 'audio' or 'video' */
     type: string;
-    /** The audio or video codec used in the channel */
+    /** @description The audio or video codec used in the channel */
     codec?: string;
   };
   TestRunId: {
     testRunId: string;
   };
+  AnalyzeResultId: {
+    analyzeResultId: string;
+  };
   TestDefinitionId: {
     testDefinitionId: string;
   };
+  WatchrtcHighlightsRes: {
+    sessions: string;
+    connections: string;
+    minutes: number;
+    duration: string;
+    participants: number;
+    metrics: {
+      score: number;
+      mos: number;
+      bitrateRecv: number;
+      bitrateSend: number;
+      packetLossRecv: number;
+      packetLossSend: number;
+      rttSend: number;
+      rttRecv: number;
+    } & {
+      rating: unknown;
+    };
+  };
+  WatchrtcInternalRoomIdRes: {
+    internalId: string;
+    url: string;
+  };
+  WatchrtcInternalPeerIdRes: {
+    internalPeerId: string;
+    peerUrl: string;
+    internalRoomId: string;
+    roomUrl: string;
+  };
+  OperationStatusRes: {
+    result: string;
+  };
   Error: {
+    /** Format: int32 */
     code: number;
     message: string;
   };
   BlobUploadResult: {
     fullBlobName: string;
   };
-  /** GetStats data collected during remote test execution (via SDK) */
+  /** @description GetStats data collected during remote test execution (via SDK) */
   GetStatsChunk: {
-    /** GetStats data */
+    /** @description GetStats data */
     data: { [key: string]: unknown };
-    /** Indicates that the test run should be finalized after this chunk of data */
+    /** @description Indicates that the test run should be finalized after this chunk of data */
     isLastChunk?: boolean;
   };
-  /** Remote test execution options */
+  /** @description Remote test execution options */
   RemoteTestOptions: {
-    /** Test name */
+    /** @description Test name */
     name: string;
   };
-  /** Network test config */
+  /** @description Network test config */
   NetworkTestConfig: { [key: string]: unknown };
-  /** An Asset. */
+  /** @description An Asset. */
   Asset: {
-    /** The uniq and readable name given to the asset. */
+    /** @description The uniq and readable name given to the asset. */
     name: string;
-    /** An asset type. */
+    /** @description An asset type. */
     asset_type?: string;
-    /** An asset description. */
+    /** @description An asset description. */
     description?: string;
-    /** Code of asset. */
+    /** @description Code of asset. */
     code?: string;
-    /** Version of asset. */
+    /** @description Version of asset. */
     version: string;
   };
-  /** An array holds all the assets */
+  /** @description An array holds all the assets */
   Assets: definitions["Asset"][];
   AssetId: {
     assetId: string;
   };
-  /** Screenshot */
+  /** @description Screenshot */
   Screenshot: {
-    /** Url of screenshot. */
+    /** @description Url of screenshot. */
     url?: string;
-    /** Screenshot name. */
+    /** @description Screenshot name. */
     name?: string;
-    /** Contains time when screenshot was taken and URL of the image itself. */
+    /** @description Contains time when screenshot was taken and URL of the image itself. */
     metadata?: {
-      /** Image URL. */
+      /** @description Image URL. */
       url?: string;
-      /** Time when screenshot was taken */
+      /** @description Time when screenshot was taken */
       timestamp?: string;
     };
   };
-  /** Object holds property that holds array of screenshots */
+  /** @description Object holds property that holds array of screenshots */
   ScreenshotsResponse: {
-    /** An array that holds screenshots */
+    /** @description An array that holds screenshots */
     screens?: definitions["Screenshot"][];
   };
-  /** Dial In results */
+  /** @description Dial In results */
   DialInData: {
-    /** callDuration */
+    /** @description callDuration */
     callDuration: number;
-    /** waitTime */
+    /** @description waitTime */
     waitTime: number;
-    /** pinCode */
+    /** @description pinCode */
     pinCode: string;
-    /** promptTime */
+    /** @description promptTime */
     promptTime: number;
-    /** mediaUrl */
+    /** @description mediaUrl */
     mediaUrl: string;
-    /** toLocation */
+    /** @description toLocation */
     toLocation: string;
-    /** fromLocation */
+    /** @description fromLocation */
     fromLocation: string;
-    /** account */
+    /** @description account */
     account: string;
   };
   MonitorResultsResponse: {
     testRunIds?: string[];
   };
   String: string;
-  /** Last monitor run info */
+  /** @description Last monitor run info */
   LastRunStatus: {
     id?: string;
     timestamp?: string;
     status?: string;
   };
-  /** QualityRTC Invite model */
+  /** @description QualityRTC Invite model */
   QualityRTCInviteRequest: {
     name: string;
+    /**
+     * Format: Date
+     * @description Date format should be as following: YYYY-MM-DD or YYYY-MM-DD HH-mm
+     */
     expiration: string;
-    /** JSON string object: https://testrtc.com/docs/invite-options-in-qualityrtc/ */
-    options?: string;
+    /** @description JSON string object: https://testrtc.com/docs/invite-options-in-qualityrtc/ */
+    options?: {
+      /** @description JSON object which contains additional fields objects */
+      fields?: { [key: string]: unknown }[];
+    };
     numberOfTests: number;
-    /** JSON object which contains additional fields values */
-    fields?: { [key: string]: unknown };
   };
   QualityRTCInviteId: {
     inviteId: string;
   };
-  /** Key and value object */
+  /** @description Key and value object */
   KeyValObj: {
     key?: string;
     value?: string;
   };
+  WatchrtcSetUserRating: {
+    /** @description The user's rating. A number between 1 to 5, where 1 is bad and 5 is great. If you are using a like/don't like rating system use only values 1 and 5. */
+    rating: number;
+    /** @description Optional textual comment explaining the user's rating. */
+    comment?: string;
+  };
+  /** @description Example: {key1: 'value1', key2: 'value2'} */
+  WatchrtcAddKeys: { [key: string]: unknown };
+  WatchrtcFilterKey: {
+    key: string;
+    value: string[];
+  };
+  WatchrtcFilter: {
+    /**
+     * Format: Date
+     * @description Date format should be as following: YYYY-MM-DD (gets the start of a day)
+     */
+    startDate: string;
+    /**
+     * Format: Date
+     * @description Date format should be as following: YYYY-MM-DD (gets the end of a day)
+     */
+    endDate: string;
+    /** @description Clients timezone offset integer value represented in hours. Example: new Date().getTimezoneOffset() / 60 */
+    timezoneOffset?: number;
+    keys?: definitions["WatchrtcFilterKey"][];
+  };
 }
 
 export interface operations {
-  /** <p>List all tests in your project. This function is useful if you want to iterate overyour tests. A good example for that is when you want to collect all testId's in order to run them sequentially on your nightly build.</p> */
+  /** <p>List all tests in your project. This function is useful if you want to iterate over your tests. A good example for that is when you want to collect all testId's in order to run them sequentially on your nightly build.</p> */
   getTests: {
     responses: {
       /** tests response */
@@ -435,7 +640,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -464,7 +669,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -481,7 +686,7 @@ export interface operations {
       };
     };
     responses: {
-      /** test response */
+      /** Test response */
       200: {
         schema: definitions["TestMinimized"];
       };
@@ -493,7 +698,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -501,7 +706,7 @@ export interface operations {
       };
     };
   };
-  /** <p>Update a new test.</p> */
+  /** <p>Update a test.</p> */
   updateTest: {
     parameters: {
       path: {
@@ -526,7 +731,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -538,7 +743,7 @@ export interface operations {
   deleteTest: {
     parameters: {
       path: {
-        /** ID of the test to update */
+        /** ID of the test to delete */
         testId: string;
       };
     };
@@ -555,7 +760,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -576,7 +781,7 @@ export interface operations {
       };
     };
     responses: {
-      /** test response */
+      /** Test response */
       200: {
         schema: definitions["TestRunId"];
       };
@@ -588,7 +793,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -604,12 +809,12 @@ export interface operations {
         testRunId: string;
       };
       query: {
-        /** <p>Defaults to false. If set to true, appear stats</p> */
+        /** <p>If set to <b>true</b>, <b>stats</b> object will appear in response JSON.</p> */
         detailed?: boolean;
       };
     };
     responses: {
-      /** test response */
+      /** TestRun response */
       200: {
         schema: definitions["TestRun"];
       };
@@ -621,7 +826,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -652,7 +857,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -668,12 +873,12 @@ export interface operations {
         testAgentId: string;
       };
       query: {
-        /** <p>Defaults to false. If set to true, appear stats</p> */
+        /** <p>If set to <b>true</b>, <b>stats</b> object will appear in response JSON.</p> */
         detailed?: boolean;
       };
     };
     responses: {
-      /** test response */
+      /** TestAgent response */
       200: {
         schema: definitions["TestAgent"];
       };
@@ -685,7 +890,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -701,7 +906,7 @@ export interface operations {
         testAgentId: string;
       };
       query: {
-        /** browser_logs | webrtc_internals_dump | getstats_dump | nighwatch_log */
+        /** browser_logs | webrtc_internals_dump | getstat_logs | nightwatch_log */
         filename: string;
       };
     };
@@ -718,7 +923,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Test iteration has no log file or not found */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -734,11 +939,14 @@ export interface operations {
         testAgentId: string;
       };
       formData: {
-        /** The file  to upload. */
-        file?: { [key: string]: unknown };
+        /** The file to upload ( <b>.txt</b> or <b>.json</b> ). */
+        file?: unknown;
       };
       query: {
-        /** File name. */
+        /**
+         * File name without extension (.txt). Please avoid usage:
+         * <pre>':','?', '#', '[', ']', '\', '/', '.'</pre>
+         */
         filename?: string;
       };
     };
@@ -755,129 +963,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
-      404: unknown;
-      /** Unexpected error */
-      default: {
-        schema: definitions["Error"];
-      };
-    };
-  };
-  /** <p>Create a new monitor.</p> */
-  createMonitor: {
-    parameters: {
-      body: {
-        /** Monitor to create */
-        monitor: definitions["Monitor"];
-      };
-    };
-    responses: {
-      /** Monitor created */
-      201: {
-        schema: definitions["Monitor"];
-      };
-      /** Bad request - Invalid parameters supplied */
-      400: {
-        schema: definitions["Error"];
-      };
-      /** Unauthorized - API key is invalid */
-      401: unknown;
-      /** Forbidden - Resource is not allowed */
-      403: unknown;
-      /** Not found - Test for monitor not found */
-      404: unknown;
-      /** Unexpected error */
-      default: {
-        schema: definitions["Error"];
-      };
-    };
-  };
-  /** <p>Get last monitor run ids</p> */
-  getMonitorResultIds: {
-    parameters: {
-      path: {
-        /** ID of the monitor to get last runs */
-        monitorId: string;
-      };
-      query: {
-        /** Amount of last results to get. Max 100. Default 10 */
-        max?: string;
-      };
-    };
-    responses: {
-      /** Last monitor results */
-      200: {
-        schema: definitions["MonitorResultsResponse"];
-      };
-      /** Bad request - Invalid parameters supplied */
-      400: {
-        schema: definitions["Error"];
-      };
-      /** Unauthorized - API key is invalid */
-      401: unknown;
-      /** Forbidden - Resource is not allowed */
-      403: unknown;
-      /** Not found - Monitor not found */
-      404: unknown;
-      /** Unexpected error */
-      default: {
-        schema: definitions["Error"];
-      };
-    };
-  };
-  /** <p>Update a monitor.</p> */
-  updateMonitorStatus: {
-    parameters: {
-      path: {
-        /** ID of the monitor to update */
-        monitorId: string;
-      };
-      body: {
-        /** The monitor status. Can be 'true' or 'false'. */
-        data: definitions["MonitorStatus"];
-      };
-    };
-    responses: {
-      /** Monitor status is updated */
-      200: unknown;
-      /** Bad request - Invalid parameters supplied */
-      400: {
-        schema: definitions["Error"];
-      };
-      /** Unauthorized - API key is invalid */
-      401: unknown;
-      /** Forbidden - Resource is not allowed */
-      403: unknown;
-      /** Not found - Monitor runs not found */
-      404: unknown;
-      /** Unexpected error */
-      default: {
-        schema: definitions["Error"];
-      };
-    };
-  };
-  /** <p>Get last monitor run status</p> */
-  getLastMonitorRunStatus: {
-    parameters: {
-      path: {
-        /** ID of the monitor to get last run status */
-        monitorId: string;
-      };
-    };
-    responses: {
-      /** Monitor last run info */
-      200: {
-        schema: definitions["LastRunStatus"];
-      };
-      /** Bad request - Invalid parameters supplied */
-      400: {
-        schema: definitions["Error"];
-      };
-      /** Unauthorized - API key is invalid */
-      401: unknown;
-      /** Forbidden - Resource is not allowed */
-      403: unknown;
-      /** Not found - Monitor runs not found */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -900,7 +986,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -929,7 +1015,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Bad request - Invalid parameters supplied */
       409: {
@@ -962,7 +1048,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -995,7 +1081,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Bad request - Invalid parameters supplied */
       409: {
@@ -1028,7 +1114,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -1057,7 +1143,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -1065,18 +1151,18 @@ export interface operations {
       };
     };
   };
-  /** <p>Dial In.</p> */
-  dialIn: {
+  /** <p>Get result of network test.</p> */
+  getQualityRtcResult: {
     parameters: {
-      body: {
-        /** dial in json data */
-        data: definitions["DialInData"];
+      path: {
+        /** ID of the previously saved network test */
+        id: string;
       };
     };
     responses: {
-      /** dial in called */
-      201: {
-        schema: definitions["DialInData"];
+      /** Network test results */
+      200: {
+        schema: { [key: string]: unknown };
       };
       /** Bad request - Invalid parameters supplied */
       400: {
@@ -1086,30 +1172,7 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
-      /** Not found - resource does not exist */
-      404: unknown;
-      /** Unexpected error */
-      default: {
-        schema: definitions["Error"];
-      };
-    };
-  };
-  /** <p>Get usage.</p> */
-  getUsage: {
-    responses: {
-      /** Usage */
-      200: {
-        schema: { [key: string]: unknown };
-      };
-      /** Bad request */
-      400: {
-        schema: definitions["Error"];
-      };
-      /** Unauthorized - API key is invalid */
-      401: unknown;
-      /** Forbidden - Resource is not allowed */
-      403: unknown;
-      /** Not found - resource does not exist */
+      /** Not found - Resource does not exist */
       404: unknown;
       /** Unexpected error */
       default: {
@@ -1138,8 +1201,163 @@ export interface operations {
       401: unknown;
       /** Forbidden - Resource is not allowed */
       403: unknown;
+      /** Not found - Resource does not exist */
+      404: unknown;
+      /** Unexpected error */
+      default: {
+        schema: definitions["Error"];
+      };
+    };
+  };
+  /** <p>watchRTC Highlights</p> */
+  watchrtcHighlights: {
+    parameters: {
+      body: {
+        /** Filter data */
+        filterData: definitions["WatchrtcFilter"];
+      };
+    };
+    responses: {
+      /** Highlights */
+      200: {
+        schema: definitions["WatchrtcHighlightsRes"];
+      };
+      /** Bad request - Invalid parameters supplied */
+      400: {
+        schema: definitions["Error"];
+      };
+      /** Unauthorized - API key is invalid */
+      401: unknown;
+      /** Forbidden - Resource is not allowed */
+      403: unknown;
+      /** Not found - Resource does not exist */
+      404: unknown;
+      /** Unexpected error */
+      default: {
+        schema: definitions["Error"];
+      };
+    };
+  };
+  /** <p>Set the user's rating on a given session.</p><p>If you are using the same roomId for multiple sessions then the user rating will be set only to the last time the roomId was used. */
+  watchrtcSetUserRating: {
+    parameters: {
+      path: {
+        /** The rtcRoomId the user rating is associated with. */
+        rtcRoomId: string;
+        /** The rtcPeerId of the user who provided his rating. */
+        rtcPeerId: string;
+      };
+      body: {
+        data: definitions["WatchrtcSetUserRating"];
+      };
+    };
+    responses: {
+      200: {
+        schema: definitions["OperationStatusRes"];
+      };
+      /** Bad request */
+      400: {
+        schema: definitions["Error"];
+      };
+      /** Unauthorized - API key is invalid */
+      401: unknown;
+      /** Forbidden - Resource is not allowed */
+      403: unknown;
       /** Not found - resource does not exist */
       404: unknown;
+      /** unexpected error */
+      default: {
+        schema: definitions["Error"];
+      };
+    };
+  };
+  /** <p>Add keys to a session of a specific peer inside a room.</p><p>If you are using the same roomId for multiple sessions then the keys will be added only to the last time the roomId was used.</p> */
+  watchrtcAddKeys: {
+    parameters: {
+      path: {
+        /** The roomId the keys are associated with. */
+        roomId: string;
+        /** The peerId of the user who has these keys. */
+        peerId: string;
+      };
+      body: {
+        data: definitions["WatchrtcAddKeys"];
+      };
+    };
+    responses: {
+      200: {
+        schema: definitions["OperationStatusRes"];
+      };
+      /** Bad request */
+      400: {
+        schema: definitions["Error"];
+      };
+      /** Unauthorized - API key is invalid */
+      401: unknown;
+      /** Forbidden - Resource is not allowed */
+      403: unknown;
+      /** Not found - resource does not exist */
+      404: unknown;
+      /** unexpected error */
+      default: {
+        schema: definitions["Error"];
+      };
+    };
+  };
+  /** <p>Upload dump file to get analyzeRTC result.</p> */
+  uploadAnalyzeDump: {
+    parameters: {
+      formData: {
+        /** Dump file to analyze ( <b>.txt</b> or <b>.json</b> ) */
+        file: unknown;
+      };
+      query: {
+        /**
+         * Optional file name without extension ( .txt, .json ). Please avoid usage:
+         * <pre>':','?', '#', '[', ']', '\', '/', '.'</pre>
+         */
+        fileName?: string;
+      };
+    };
+    responses: {
+      /** Dump file analyze result ID */
+      200: {
+        schema: definitions["AnalyzeResultId"];
+      };
+      /** Bad request - Invalid parameters supplied */
+      400: {
+        schema: definitions["Error"];
+      };
+      /** Unauthorized - API key is invalid */
+      401: unknown;
+      /** Forbidden - Resource is not allowed */
+      403: unknown;
+      /** Not found - Resource does not exist */
+      404: unknown;
+      /** Unexpected error */
+      default: {
+        schema: definitions["Error"];
+      };
+    };
+  };
+  /** <p>Get GCP IP address ranges.</p> */
+  getGCPIPRangesInfo: {
+    responses: {
+      /** Success */
+      200: {
+        schema: {
+          /** Format: date-time */
+          created?: string;
+          /** @example Google Cloud */
+          service?: string;
+          ranges?: {
+            "zone-name"?: {
+              ipv4Prefixes?: string[];
+              ipv6Prefixes?: string[];
+            };
+          };
+        };
+      };
       /** Unexpected error */
       default: {
         schema: definitions["Error"];
